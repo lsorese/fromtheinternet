@@ -159,54 +159,12 @@
   }
 
   @media (min-width: 640px) {
-    .hero {
-      padding: 3rem 0;
-      margin-bottom: 2rem;
-    }
-
     .hero h1 {
-      font-size: 2.5rem;
-    }
-
-    .hero p {
-      font-size: 1rem;
-    }
-
-    .episodes h2 {
-      font-size: 0.875rem;
-      margin-bottom: 1.5rem;
+      font-size: 2rem;
     }
 
     .episode-list {
-      margin: 0;
-    }
-
-    .episode-item {
-      padding: 1.5rem;
-      gap: 1rem;
-    }
-
-    .episode-meta {
-      font-size: 0.75rem;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .episode-title {
-      font-size: 1.125rem;
-    }
-
-    .episode-desc {
-      font-size: 0.875rem;
-    }
-
-    .episode-tracks {
-      font-size: 0.75rem;
-    }
-
-    .play-btn {
-      padding: 0.5rem 1rem;
-      font-size: 0.75rem;
+      margin: 0 -1rem;
     }
   }
 </style>

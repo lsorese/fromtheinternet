@@ -89,28 +89,12 @@
   }
 
   @media (min-width: 640px) {
-    header {
-      padding: 1.5rem 2rem;
-    }
-
     .logo {
       font-size: 1.25rem;
     }
 
-    nav {
-      gap: 1.5rem;
-    }
-
     nav a {
       font-size: 0.875rem;
-    }
-
-    main {
-      padding: 2rem;
-    }
-
-    footer {
-      padding: 2rem;
     }
   }
 </style>
