@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { formatDate, formatDuration, type Episode } from '$lib';
+  import { formatDate, formatDuration, formatTime, type Episode } from '$lib';
 
   let { data } = $props();
 
@@ -26,9 +26,31 @@
     </button>
   </header>
 
-  <div class="content">
-    {@html data.content}
-  </div>
+  {#if data.episode.chapters && data.episode.chapters.length > 0}
+    <section class="tracklist">
+      <h2>Tracklist</h2>
+      <ol class="tracks">
+        {#each data.episode.chapters as chapter, i}
+          <li class="track">
+            <span class="track-number">{String(i + 1).padStart(2, '0')}</span>
+            <div class="track-info">
+              <span class="track-title">{chapter.title}</span>
+              {#if chapter.desc}
+                <span class="track-desc">{chapter.desc}</span>
+              {/if}
+            </div>
+            <span class="track-time">{formatTime(chapter.start)}</span>
+          </li>
+        {/each}
+      </ol>
+    </section>
+  {/if}
+
+  {#if data.Content}
+    <div class="content">
+      <data.Content />
+    </div>
+  {/if}
 
   <footer class="episode-footer">
     <a href="/">← All Episodes</a>
@@ -112,6 +134,67 @@
 
   .content :global(a) {
     text-decoration: underline;
+  }
+
+  .tracklist {
+    margin-bottom: 2rem;
+  }
+
+  .tracklist h2 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray);
+    margin-bottom: 1rem;
+  }
+
+  .tracks {
+    list-style: none;
+    border: 1px solid var(--black);
+  }
+
+  .track {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--light-gray);
+  }
+
+  .track:last-child {
+    border-bottom: none;
+  }
+
+  .track-number {
+    font-size: 0.7rem;
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .track-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .track-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .track-desc {
+    font-size: 0.8rem;
+    color: var(--gray);
+  }
+
+  .track-time {
+    font-size: 0.75rem;
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
   }
 
   .episode-footer {

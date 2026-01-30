@@ -8,22 +8,21 @@ size: 5030313
 chapters:
   - start: 0
     title: "Intro"
+    desc: "Setting the stage for what's to come"
   - start: 30
-    title: "Track 1: Digital Wasteland"
+    title: "Digital Wasteland"
+    desc: "A lo-fi exploration of abandoned servers"
   - start: 70
-    title: "Track 2: Neon Prophecy"
+    title: "Neon Prophecy"
+    desc: "Synth-driven chaos from the year 3000"
   - start: 110
     title: "Outro & Credits"
+    desc: "Thanks and see you next time"
 ---
 
 ## Show Notes
 
 Welcome to the first episode. We're kicking things off with a meditation on why predicting tomorrow is mostly a fool's errand.
-
-### Tracklist
-
-1. **Digital Wasteland** - A lo-fi exploration
-2. **Neon Prophecy** - Synth-driven chaos
 
 ### Links
 

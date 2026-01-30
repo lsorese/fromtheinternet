@@ -8,25 +8,24 @@ size: 5110463
 chapters:
   - start: 0
     title: "Alert Tone"
+    desc: "The sound that stops everything"
   - start: 10
-    title: "Track 1: Static Whispers"
+    title: "Static Whispers"
+    desc: "What the noise is saying when you listen close"
   - start: 50
-    title: "Track 2: Signal Lost"
+    title: "Signal Lost"
+    desc: "When the connection drops and you're alone"
   - start: 90
-    title: "Track 3: Found Frequency"
+    title: "Found Frequency"
+    desc: "Tuning into something that shouldn't exist"
   - start: 130
     title: "Sign Off"
+    desc: "End of transmission"
 ---
 
 ## Show Notes
 
 We interrupt your regularly scheduled programming for something far more unsettling.
-
-### Tracklist
-
-1. **Static Whispers** - What the noise is saying
-2. **Signal Lost** - When the connection drops
-3. **Found Frequency** - Tuning into the unknown
 
 ### Links
 

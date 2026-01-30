@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { formatDate, formatDuration, type Episode } from '$lib';
+  import { formatDate, formatDuration, formatTime, type Episode } from '$lib';
 
   let { data } = $props();
 
@@ -30,6 +30,16 @@
           </div>
           <h3 class="episode-title">{episode.title}</h3>
           <p class="episode-desc">{episode.description}</p>
+          {#if episode.chapters && episode.chapters.length > 0}
+            <ul class="episode-tracks">
+              {#each episode.chapters as chapter}
+                <li>
+                  <span class="track-time">{formatTime(chapter.start)}</span>
+                  <span class="track-name">{chapter.title}</span>
+                </li>
+              {/each}
+            </ul>
+          {/if}
         </a>
         <button class="play-btn" onclick={() => playEpisode(episode)}>
           ▶ Play
@@ -42,13 +52,13 @@
 <style>
   .hero {
     text-align: center;
-    padding: 3rem 0;
+    padding: 2rem 0;
     border-bottom: 2px solid var(--black);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
 
   .hero h1 {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     margin-bottom: 0.5rem;
@@ -56,13 +66,14 @@
 
   .hero p {
     color: var(--gray);
+    font-size: 0.875rem;
   }
 
   .episodes h2 {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     color: var(--gray);
   }
 
@@ -72,15 +83,16 @@
     flex-direction: column;
     gap: 1px;
     background: var(--black);
+    margin: 0 -1rem;
   }
 
   .episode-item {
     background: var(--white);
-    padding: 1.5rem;
+    padding: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .episode-link {
@@ -90,29 +102,52 @@
 
   .episode-meta {
     display: flex;
-    gap: 1rem;
-    font-size: 0.75rem;
+    gap: 0.75rem;
+    font-size: 0.7rem;
     color: var(--gray);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     font-variant-numeric: tabular-nums;
   }
 
   .episode-title {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
     margin-bottom: 0.25rem;
   }
 
   .episode-desc {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
+    color: var(--gray);
+  }
+
+  .episode-tracks {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .episode-tracks li {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .episode-tracks .track-time {
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .episode-tracks .track-name {
     color: var(--gray);
   }
 
   .play-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.75rem;
     border: 2px solid var(--black);
     background: var(--white);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -121,5 +156,57 @@
   .play-btn:hover {
     background: var(--black);
     color: var(--white);
+  }
+
+  @media (min-width: 640px) {
+    .hero {
+      padding: 3rem 0;
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+    }
+
+    .hero p {
+      font-size: 1rem;
+    }
+
+    .episodes h2 {
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .episode-list {
+      margin: 0;
+    }
+
+    .episode-item {
+      padding: 1.5rem;
+      gap: 1rem;
+    }
+
+    .episode-meta {
+      font-size: 0.75rem;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .episode-title {
+      font-size: 1.125rem;
+    }
+
+    .episode-desc {
+      font-size: 0.875rem;
+    }
+
+    .episode-tracks {
+      font-size: 0.75rem;
+    }
+
+    .play-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+    }
   }
 </style>

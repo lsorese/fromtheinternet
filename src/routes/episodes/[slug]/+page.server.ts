@@ -8,19 +8,7 @@ export function load({ params }) {
     throw error(404, 'Episode not found');
   }
 
-  const episodeFiles = import.meta.glob('/src/content/episodes/*.md', { eager: true }) as Record<
-    string,
-    { default: { render: () => { html: string } } }
-  >;
-
-  const path = `/src/content/episodes/${params.slug}.md`;
-  const module = episodeFiles[path];
-  const content = module?.default?.render?.()?.html ?? '';
-
-  return {
-    episode,
-    content
-  };
+  return { episode };
 }
 
 export function entries() {

@@ -126,37 +126,42 @@
     right: 0;
     background: var(--white);
     border-top: 2px solid var(--black);
-    padding: 1rem;
+    padding: 0.75rem;
   }
 
   .player-info {
     display: flex;
     justify-content: space-between;
     margin-bottom: 0.5rem;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
   }
 
   .player-title {
     font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 0.5rem;
   }
 
   .player-time {
     font-variant-numeric: tabular-nums;
     color: var(--gray);
+    flex-shrink: 0;
   }
 
   .player-controls {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     align-items: center;
   }
 
   .play-btn {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border: 2px solid var(--black);
     background: var(--white);
-    font-size: 1rem;
+    font-size: 0.875rem;
     cursor: pointer;
     flex-shrink: 0;
   }
@@ -174,21 +179,22 @@
   .chapters {
     display: flex;
     gap: 0.5rem;
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
     overflow-x: auto;
     padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
   }
 
   .chapter {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.6rem;
     border: 1px solid var(--light-gray);
     background: var(--white);
     cursor: pointer;
     white-space: nowrap;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
   }
 
   .chapter:hover {
@@ -212,5 +218,34 @@
 
   .chapter-title {
     font-weight: 500;
+  }
+
+  @media (min-width: 640px) {
+    .player {
+      padding: 1rem;
+    }
+
+    .player-info {
+      font-size: 0.875rem;
+    }
+
+    .player-controls {
+      gap: 1rem;
+    }
+
+    .play-btn {
+      width: 48px;
+      height: 48px;
+      font-size: 1rem;
+    }
+
+    .chapters {
+      margin-top: 0.75rem;
+    }
+
+    .chapter {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+    }
   }
 </style>

@@ -1,6 +1,7 @@
 export interface Chapter {
   start: number;
   title: string;
+  desc?: string;
 }
 
 export interface Episode {

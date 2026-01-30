@@ -41,30 +41,30 @@
 <style>
   .app {
     min-height: 100vh;
-    padding-bottom: 200px; /* Space for player */
+    padding-bottom: 200px;
   }
 
   header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 2rem;
+    padding: 1rem;
     border-bottom: 2px solid var(--black);
   }
 
   .logo {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.05em;
   }
 
   nav {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   nav a {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -72,13 +72,13 @@
   main {
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem;
   }
 
   footer {
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem;
     font-size: 0.75rem;
     color: var(--gray);
     border-top: 1px solid var(--light-gray);
@@ -86,5 +86,31 @@
 
   footer a {
     text-decoration: underline;
+  }
+
+  @media (min-width: 640px) {
+    header {
+      padding: 1.5rem 2rem;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+    }
+
+    nav {
+      gap: 1.5rem;
+    }
+
+    nav a {
+      font-size: 0.875rem;
+    }
+
+    main {
+      padding: 2rem;
+    }
+
+    footer {
+      padding: 2rem;
+    }
   }
 </style>
