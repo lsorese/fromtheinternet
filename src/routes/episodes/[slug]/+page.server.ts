@@ -1,6 +1,8 @@
 import { error } from '@sveltejs/kit';
 import { getEpisode, getEpisodes } from '$lib/episodes';
 
+export const prerender = true;
+
 export function load({ params }) {
   const episode = getEpisode(params.slug);
 
