@@ -22,20 +22,20 @@ const episodeFiles = import.meta.glob('/src/content/episodes/*.md', { eager: tru
   { default: unknown; metadata: Omit<Episode, 'slug' | 'content'> }
 >;
 
+function createEpisode(slug: string, metadata: Omit<Episode, 'slug' | 'content'>): Episode {
+  return {
+    slug,
+    ...metadata,
+    content: '',
+    waveform: `/waveforms/${slug}.png`
+  };
+}
+
 export function getEpisodes(): Episode[] {
-  const episodes: Episode[] = [];
-
-  for (const [path, module] of Object.entries(episodeFiles)) {
+  const episodes = Object.entries(episodeFiles).map(([path, module]) => {
     const slug = path.split('/').pop()?.replace('.md', '') ?? '';
-    const { metadata } = module;
-
-    episodes.push({
-      slug,
-      ...metadata,
-      content: '',
-      waveform: `/waveforms/${slug}.png`
-    });
-  }
+    return createEpisode(slug, module.metadata);
+  });
 
   return episodes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
@@ -46,10 +46,5 @@ export function getEpisode(slug: string): Episode | undefined {
 
   if (!module) return undefined;
 
-  return {
-    slug,
-    ...module.metadata,
-    content: '',
-    waveform: `/waveforms/${slug}.png`
-  };
+  return createEpisode(slug, module.metadata);
 }

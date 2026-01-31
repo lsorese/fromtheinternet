@@ -11,6 +11,7 @@
   let regions: RegionsPlugin | null = null;
   let isPlaying = $state(false);
   let isLoading = $state(false);
+  let isDecoding = $state(false);
   let loadingProgress = $state(0);
   let currentTime = $state(0);
   let duration = $state(0);
@@ -55,10 +56,14 @@
 
       wavesurfer.on('loading', (percent) => {
         loadingProgress = percent;
+        if (percent === 100) {
+          isLoading = false;
+          isDecoding = true;
+        }
       });
 
       wavesurfer.on('ready', () => {
-        isLoading = false;
+        isDecoding = false;
         duration = wavesurfer!.getDuration();
 
         if (episode?.chapters) {
@@ -122,9 +127,11 @@
 
       <div class="waveform-container">
         <div class="waveform" class:loading={isLoading} bind:this={container}></div>
-        {#if isLoading}
+        {#if isLoading || isDecoding}
           <div class="loading-overlay">
-            <span class="loading-text">Loading {loadingProgress}%</span>
+            <span class="loading-text">
+              {#if isLoading}Loading {loadingProgress}%{:else}Rendering{/if}
+            </span>
           </div>
         {/if}
       </div>
