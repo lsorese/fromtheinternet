@@ -14,7 +14,7 @@ export interface Episode {
   size: number;
   chapters: Chapter[];
   content: string;
-  peaks?: string; // Path to pre-computed peaks JSON
+  waveform?: string; // Path to pre-rendered waveform image
 }
 
 const episodeFiles = import.meta.glob('/src/content/episodes/*.md', { eager: true }) as Record<
@@ -33,7 +33,7 @@ export function getEpisodes(): Episode[] {
       slug,
       ...metadata,
       content: '',
-      peaks: `/peaks/${slug}.json`
+      waveform: `/waveforms/${slug}.png`
     });
   }
 
@@ -50,6 +50,6 @@ export function getEpisode(slug: string): Episode | undefined {
     slug,
     ...module.metadata,
     content: '',
-    peaks: `/peaks/${slug}.json`
+    waveform: `/waveforms/${slug}.png`
   };
 }

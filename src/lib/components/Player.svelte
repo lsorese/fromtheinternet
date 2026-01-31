@@ -1,123 +1,119 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import WaveSurfer from 'wavesurfer.js';
-  import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.js';
   import { formatTime, type Episode } from '$lib';
 
   let { episode = $bindable<Episode | null>(null), autoplay = $bindable(false) } = $props();
 
-  let container: HTMLDivElement = $state(null!);
-  let wavesurfer: WaveSurfer | null = null;
-  let regions: RegionsPlugin | null = null;
+  let audio: HTMLAudioElement = $state(null!);
   let isPlaying = $state(false);
   let isLoading = $state(false);
-  let loadingStatus = $state('');
+  let loadingProgress = $state(0);
   let currentTime = $state(0);
   let duration = $state(0);
-  let shouldAutoplay = false;
+  let audioReady = false;
+
+  function loadAudio() {
+    if (!episode || audioReady || isLoading) return;
+    isLoading = true;
+    loadingProgress = 0;
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', episode.audio, true);
+    xhr.responseType = 'blob';
+
+    xhr.onprogress = (e) => {
+      if (e.lengthComputable) {
+        loadingProgress = Math.round((e.loaded / e.total) * 100);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const url = URL.createObjectURL(xhr.response);
+        audio.src = url;
+        audio.load();
+      }
+    };
+
+    xhr.send();
+  }
 
   function togglePlay() {
-    wavesurfer?.playPause();
+    if (!audioReady) {
+      loadAudio();
+      return;
+    }
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
   }
 
   function seekTo(time: number) {
-    if (wavesurfer && duration > 0) {
-      const wasPlaying = wavesurfer.isPlaying();
-      wavesurfer.pause();
-      wavesurfer.setTime(time);
-      if (wasPlaying) {
-        wavesurfer.play();
-      }
+    if (!audioReady) {
+      loadAudio();
+      return;
     }
+    console.log('Seeking to:', time, 'buffered:', audio.buffered.length > 0 ? `${audio.buffered.start(0)}-${audio.buffered.end(0)}` : 'none');
+    audio.pause();
+    audio.currentTime = time;
+    console.log('After seek, currentTime:', audio.currentTime);
+    audio.play().catch(console.error);
+  }
+
+  function handleCanPlayThrough() {
+    audioReady = true;
+    isLoading = false;
+    duration = audio.duration;
+    console.log('Audio ready, duration:', duration, 'buffered:', audio.buffered.length > 0 ? `${audio.buffered.start(0)}-${audio.buffered.end(0)}` : 'none');
+    audio.play();
+  }
+
+  function handleTimeUpdate() {
+    currentTime = audio.currentTime;
+  }
+
+  function handlePlay() {
+    isPlaying = true;
+  }
+
+  function handlePause() {
+    isPlaying = false;
+  }
+
+  function handleWaveformClick(e: MouseEvent) {
+    if (!audioReady || !duration) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = ratio * duration;
   }
 
   $effect(() => {
-    if (autoplay) {
-      shouldAutoplay = true;
-      autoplay = false; // Reset the flag
+    if (episode) {
+      // Reset state for new episode
+      audioReady = false;
+      isLoading = false;
+      loadingProgress = 0;
+      currentTime = 0;
+      duration = episode.duration;
+      isPlaying = false;
+
+      if (autoplay) {
+        autoplay = false;
+        loadAudio();
+      }
     }
-  });
-
-  $effect(() => {
-    if (episode && container && typeof window !== 'undefined') {
-      wavesurfer?.destroy();
-      isLoading = true;
-      loadingStatus = 'Downloading...';
-
-      wavesurfer = WaveSurfer.create({
-        container,
-        waveColor: '#888',
-        progressColor: '#000',
-        cursorColor: '#000',
-        barWidth: 2,
-        barGap: 1,
-        height: 60,
-        url: episode.audio,
-        interact: true
-      });
-
-      regions = wavesurfer.registerPlugin(RegionsPlugin.create());
-
-      wavesurfer.on('loading', (percent) => {
-        loadingStatus = `Downloading ${percent}%`;
-      });
-
-      wavesurfer.on('decode', () => {
-        loadingStatus = 'Decoding...';
-      });
-
-      wavesurfer.on('ready', () => {
-        isLoading = false;
-        loadingStatus = '';
-        duration = wavesurfer!.getDuration();
-
-        if (episode?.chapters) {
-          episode.chapters.forEach((chapter, i) => {
-            const nextChapter = episode!.chapters[i + 1];
-            const end = nextChapter ? nextChapter.start : duration;
-
-            const label = document.createElement('span');
-            label.textContent = chapter.title;
-            label.style.cssText = `
-              background: white;
-              padding: 2px 6px;
-              margin: 4px;
-              font-size: 10px;
-              font-weight: 600;
-              border-radius: 2px;
-              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-              color: black;
-              display: ${window.innerWidth >= 640 ? 'inline-block' : 'none'};
-            `;
-
-            regions!.addRegion({
-              start: chapter.start,
-              end,
-              content: label,
-              color: 'rgba(0, 0, 0, 0.05)',
-              drag: false,
-              resize: false
-            });
-          });
-        }
-
-        if (shouldAutoplay) {
-          wavesurfer!.play();
-          shouldAutoplay = false;
-        }
-      });
-
-      wavesurfer.on('play', () => isPlaying = true);
-      wavesurfer.on('pause', () => isPlaying = false);
-      wavesurfer.on('timeupdate', (time) => currentTime = time);
-
-    }
-  });
-
-  onDestroy(() => {
-    wavesurfer?.destroy();
   });
 </script>
+
+<audio
+  bind:this={audio}
+  oncanplaythrough={handleCanPlayThrough}
+  ontimeupdate={handleTimeUpdate}
+  onplay={handlePlay}
+  onpause={handlePause}
+></audio>
 
 {#if episode}
   <div class="player">
@@ -132,10 +128,19 @@
       </button>
 
       <div class="waveform-container">
-        <div class="waveform" class:loading={isLoading} bind:this={container}></div>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div class="waveform" class:loading={isLoading} onclick={handleWaveformClick}>
+          {#if episode.waveform}
+            <img src={episode.waveform} alt="" class="waveform-image" />
+          {:else}
+            <div class="waveform-placeholder"></div>
+          {/if}
+          <div class="waveform-progress" style="width: {duration ? (currentTime / duration) * 100 : 0}%"></div>
+        </div>
         {#if isLoading}
           <div class="loading-overlay">
-            <span class="loading-text">{loadingStatus}</span>
+            <span class="loading-text">Loading {loadingProgress}%</span>
           </div>
         {/if}
       </div>
@@ -240,11 +245,37 @@
   }
 
   .waveform {
-    width: 100%;
+    position: relative;
+    height: 60px;
+    background: var(--light-gray);
+    cursor: pointer;
+    overflow: hidden;
 
     &.loading {
       animation: pulse 1.5s ease-in-out infinite;
     }
+  }
+
+  .waveform-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+  }
+
+  .waveform-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #ccc 0%, #ddd 50%, #ccc 100%);
+  }
+
+  .waveform-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    pointer-events: none;
   }
 
   .loading-overlay {
