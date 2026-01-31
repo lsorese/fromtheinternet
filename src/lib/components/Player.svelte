@@ -10,8 +10,6 @@
   let wavesurfer: WaveSurfer | null = null;
   let regions: RegionsPlugin | null = null;
   let isPlaying = $state(false);
-  let isLoading = $state(false);
-  let loadingProgress = $state(0);
   let currentTime = $state(0);
   let duration = $state(0);
   let shouldAutoplay = false;
@@ -22,22 +20,25 @@
 
   function seekTo(time: number) {
     if (wavesurfer && duration > 0) {
-      wavesurfer.seekTo(time / duration);
+      const wasPlaying = wavesurfer.isPlaying();
+      wavesurfer.pause();
+      wavesurfer.setTime(time);
+      if (wasPlaying) {
+        wavesurfer.play();
+      }
     }
   }
 
   $effect(() => {
     if (autoplay) {
       shouldAutoplay = true;
-      autoplay = false;
+      autoplay = false; // Reset the flag
     }
   });
 
   $effect(() => {
     if (episode && container && typeof window !== 'undefined') {
       wavesurfer?.destroy();
-      isLoading = true;
-      loadingProgress = 0;
 
       wavesurfer = WaveSurfer.create({
         container,
@@ -53,12 +54,7 @@
 
       regions = wavesurfer.registerPlugin(RegionsPlugin.create());
 
-      wavesurfer.on('loading', (percent) => {
-        loadingProgress = percent;
-      });
-
       wavesurfer.on('ready', () => {
-        isLoading = false;
         duration = wavesurfer!.getDuration();
 
         if (episode?.chapters) {
@@ -100,6 +96,7 @@
       wavesurfer.on('play', () => isPlaying = true);
       wavesurfer.on('pause', () => isPlaying = false);
       wavesurfer.on('timeupdate', (time) => currentTime = time);
+
     }
   });
 
@@ -116,18 +113,11 @@
     </div>
 
     <div class="player-controls">
-      <button class="play-btn" onclick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
-        <img src={isPlaying ? '/icons/pause.svg' : '/icons/play.svg'} alt="" width="16" height="16" />
+      <button class="play-btn" onclick={togglePlay}>
+        {isPlaying ? '▐▐' : '▶'}
       </button>
 
-      <div class="waveform-container">
-        <div class="waveform" class:loading={isLoading} bind:this={container}></div>
-        {#if isLoading}
-          <div class="loading-overlay">
-            <span class="loading-text">Loading{loadingProgress > 0 ? ` ${loadingProgress}%` : '...'}</span>
-          </div>
-        {/if}
-      </div>
+      <div class="waveform" bind:this={container}></div>
     </div>
 
     {#if episode.chapters && episode.chapters.length > 0}
@@ -222,44 +212,9 @@
     }
   }
 
-  .waveform-container {
+  .waveform {
     flex: 1;
     min-width: 0;
-    position: relative;
-  }
-
-  .waveform {
-    width: 100%;
-
-    &.loading {
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-  }
-
-  .loading-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-  }
-
-  .loading-text {
-    background: var(--black);
-    color: var(--white);
-    padding: 0.25rem 0.5rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.4;
-    }
   }
 
   .chapters {
