@@ -20,8 +20,8 @@
   }
 
   function seekTo(time: number) {
-    if (wavesurfer) {
-      wavesurfer.setTime(time);
+    if (audioElement) {
+      audioElement.currentTime = time;
     }
   }
 
