@@ -10,6 +10,8 @@
   let wavesurfer: WaveSurfer | null = null;
   let regions: RegionsPlugin | null = null;
   let isPlaying = $state(false);
+  let isLoading = $state(false);
+  let loadingStatus = $state('');
   let currentTime = $state(0);
   let duration = $state(0);
   let shouldAutoplay = false;
@@ -39,6 +41,8 @@
   $effect(() => {
     if (episode && container && typeof window !== 'undefined') {
       wavesurfer?.destroy();
+      isLoading = true;
+      loadingStatus = 'Downloading...';
 
       wavesurfer = WaveSurfer.create({
         container,
@@ -54,7 +58,17 @@
 
       regions = wavesurfer.registerPlugin(RegionsPlugin.create());
 
+      wavesurfer.on('loading', (percent) => {
+        loadingStatus = `Downloading ${percent}%`;
+      });
+
+      wavesurfer.on('decode', () => {
+        loadingStatus = 'Decoding...';
+      });
+
       wavesurfer.on('ready', () => {
+        isLoading = false;
+        loadingStatus = '';
         duration = wavesurfer!.getDuration();
 
         if (episode?.chapters) {
@@ -117,7 +131,14 @@
         {isPlaying ? '▐▐' : '▶'}
       </button>
 
-      <div class="waveform" bind:this={container}></div>
+      <div class="waveform-container">
+        <div class="waveform" class:loading={isLoading} bind:this={container}></div>
+        {#if isLoading}
+          <div class="loading-overlay">
+            <span class="loading-text">{loadingStatus}</span>
+          </div>
+        {/if}
+      </div>
     </div>
 
     {#if episode.chapters && episode.chapters.length > 0}
@@ -212,9 +233,44 @@
     }
   }
 
-  .waveform {
+  .waveform-container {
     flex: 1;
     min-width: 0;
+    position: relative;
+  }
+
+  .waveform {
+    width: 100%;
+
+    &.loading {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .loading-text {
+    background: var(--black);
+    color: var(--white);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
   }
 
   .chapters {
