@@ -9,7 +9,7 @@
  *   - ffmpeg must be installed (brew install ffmpeg)
  *
  * This script reads the frontmatter from the markdown file and:
- *   1. Converts audio to V0 quality (VBR ~245kbps)
+ *   1. Converts audio to 256kbps CBR with Xing header for seeking
  *   2. Updates ID3 tags (title, artist)
  *   3. Adds chapter markers (ID3v2 CHAP frames)
  */
@@ -163,7 +163,7 @@ async function updateMp3Metadata(mdPath) {
   // Create output path
   const outputPath = audioPath.replace('.mp3', '.temp.mp3');
 
-  // Build ffmpeg command with V0 encoding (libmp3lame -q:a 0 = highest VBR quality ~245kbps)
+  // Build ffmpeg command with 256kbps CBR and Xing header for accurate seeking
   const ffmpegArgs = [
     '-i', `"${audioPath}"`,
     '-i', `"${metadataPath}"`,
@@ -171,7 +171,8 @@ async function updateMp3Metadata(mdPath) {
     '-map_chapters', '1',
     '-map', '0:a',
     '-c:a', 'libmp3lame',
-    '-q:a', '0',
+    '-b:a', '256k',
+    '-write_xing', '1',
     '-id3v2_version', '3',
     '-metadata', `title="${frontmatter.title}"`,
     '-metadata', `artist="${frontmatter.artist || ''}"`,
@@ -179,7 +180,7 @@ async function updateMp3Metadata(mdPath) {
     `"${outputPath}"`
   ];
 
-  console.log('\nEncoding to V0 quality (VBR ~245kbps)...');
+  console.log('\nEncoding to 256kbps CBR with Xing header...');
 
   const cmd = `ffmpeg -y ${ffmpegArgs.join(' ')}`;
   console.log('\nRunning:', cmd);
@@ -197,7 +198,7 @@ async function updateMp3Metadata(mdPath) {
     // Get new file size
     const { statSync } = await import('fs');
     const newSize = statSync(audioPath).size;
-    console.log(`\nSuccess! MP3 encoded to V0 with chapters and metadata.`);
+    console.log(`\nSuccess! MP3 encoded to 256kbps with chapters and metadata.`);
     console.log(`New file size: ${(newSize / 1024 / 1024).toFixed(2)} MB`);
   } catch (error) {
     console.error('Error running ffmpeg:', error.message);
