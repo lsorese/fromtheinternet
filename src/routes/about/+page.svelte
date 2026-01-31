@@ -31,7 +31,7 @@
   </p>
 </article>
 
-<style>
+<style lang="scss">
   .about {
     max-width: 600px;
   }

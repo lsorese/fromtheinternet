@@ -38,7 +38,7 @@
   <Player bind:episode={currentEpisode} bind:autoplay />
 </div>
 
-<style>
+<style lang="scss">
   .app {
     min-height: 100vh;
     padding-bottom: 200px;
@@ -56,17 +56,25 @@
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.05em;
+
+    @media (min-width: 640px) {
+      font-size: 1.25rem;
+    }
   }
 
   nav {
     display: flex;
     gap: 1rem;
-  }
 
-  nav a {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    a {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      @media (min-width: 640px) {
+        font-size: 0.875rem;
+      }
+    }
   }
 
   main {
@@ -82,19 +90,9 @@
     font-size: 0.75rem;
     color: var(--gray);
     border-top: 1px solid var(--light-gray);
-  }
 
-  footer a {
-    text-decoration: underline;
-  }
-
-  @media (min-width: 640px) {
-    .logo {
-      font-size: 1.25rem;
-    }
-
-    nav a {
-      font-size: 0.875rem;
+    a {
+      text-decoration: underline;
     }
   }
 </style>

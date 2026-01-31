@@ -57,7 +57,7 @@
   </footer>
 </article>
 
-<style>
+<style lang="scss">
   .episode {
     max-width: 600px;
   }
@@ -95,57 +95,57 @@
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
-  }
 
-  .play-btn:hover {
-    background: var(--white);
-    color: var(--black);
+    &:hover {
+      background: var(--white);
+      color: var(--black);
+    }
   }
 
   .content {
     line-height: 1.7;
-  }
 
-  .content :global(h2) {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 2rem 0 1rem;
-  }
+    :global(h2) {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 2rem 0 1rem;
+    }
 
-  .content :global(h3) {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 1.5rem 0 0.75rem;
-  }
+    :global(h3) {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem;
+    }
 
-  .content :global(p) {
-    margin-bottom: 1rem;
-  }
+    :global(p) {
+      margin-bottom: 1rem;
+    }
 
-  .content :global(ol),
-  .content :global(ul) {
-    margin-bottom: 1rem;
-    padding-left: 1.5rem;
-  }
+    :global(ol),
+    :global(ul) {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
 
-  .content :global(li) {
-    margin-bottom: 0.5rem;
-  }
+    :global(li) {
+      margin-bottom: 0.5rem;
+    }
 
-  .content :global(a) {
-    text-decoration: underline;
+    :global(a) {
+      text-decoration: underline;
+    }
   }
 
   .tracklist {
     margin-bottom: 2rem;
-  }
 
-  .tracklist h2 {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gray);
-    margin-bottom: 1rem;
+    h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray);
+      margin-bottom: 1rem;
+    }
   }
 
   .tracks {
@@ -159,10 +159,10 @@
     gap: 1rem;
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--light-gray);
-  }
 
-  .track:last-child {
-    border-bottom: none;
+    &:last-child {
+      border-bottom: none;
+    }
   }
 
   .track-number {
@@ -201,10 +201,10 @@
     margin-top: 3rem;
     padding-top: 2rem;
     border-top: 1px solid var(--light-gray);
-  }
 
-  .episode-footer a {
-    font-size: 0.875rem;
-    color: var(--gray);
+    a {
+      font-size: 0.875rem;
+      color: var(--gray);
+    }
   }
 </style>

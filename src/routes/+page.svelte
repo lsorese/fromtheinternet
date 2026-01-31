@@ -49,32 +49,38 @@
   </ul>
 </section>
 
-<style>
+<style lang="scss">
   .hero {
     text-align: center;
     padding: 2rem 0;
     border-bottom: 2px solid var(--black);
     margin-bottom: 1rem;
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+
+      @media (min-width: 640px) {
+        font-size: 2rem;
+      }
+    }
+
+    p {
+      color: var(--gray);
+      font-size: 0.875rem;
+    }
   }
 
-  .hero h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-  }
-
-  .hero p {
-    color: var(--gray);
-    font-size: 0.875rem;
-  }
-
-  .episodes h2 {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 1rem;
-    color: var(--gray);
+  .episodes {
+    h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      color: var(--gray);
+    }
   }
 
   .episode-list {
@@ -127,20 +133,20 @@
     gap: 0.25rem 0.75rem;
     margin-top: 0.5rem;
     font-size: 0.7rem;
-  }
 
-  .episode-tracks li {
-    display: flex;
-    gap: 0.35rem;
-  }
+    li {
+      display: flex;
+      gap: 0.35rem;
+    }
 
-  .episode-tracks .track-time {
-    color: var(--gray);
-    font-variant-numeric: tabular-nums;
-  }
+    .track-time,
+    .track-name {
+      color: var(--gray);
+    }
 
-  .episode-tracks .track-name {
-    color: var(--gray);
+    .track-time {
+      font-variant-numeric: tabular-nums;
+    }
   }
 
   .play-btn {
@@ -151,20 +157,10 @@
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
-  }
 
-  .play-btn:hover {
-    background: var(--black);
-    color: var(--white);
-  }
-
-  @media (min-width: 640px) {
-    .hero h1 {
-      font-size: 2rem;
-    }
-
-    .episode-list {
-      margin: 0 -1rem;
+    &:hover {
+      background: var(--black);
+      color: var(--white);
     }
   }
 </style>

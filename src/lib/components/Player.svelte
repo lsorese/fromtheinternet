@@ -118,7 +118,7 @@
   </div>
 {/if}
 
-<style>
+<style lang="scss">
   .player {
     position: fixed;
     bottom: 0;
@@ -127,6 +127,10 @@
     background: var(--white);
     border-top: 2px solid var(--black);
     padding: 0.75rem;
+
+    @media (min-width: 640px) {
+      padding: 1rem;
+    }
   }
 
   .player-info {
@@ -134,6 +138,10 @@
     justify-content: space-between;
     margin-bottom: 0.5rem;
     font-size: 0.75rem;
+
+    @media (min-width: 640px) {
+      font-size: 0.875rem;
+    }
   }
 
   .player-title {
@@ -154,6 +162,10 @@
     display: flex;
     gap: 0.75rem;
     align-items: center;
+
+    @media (min-width: 640px) {
+      gap: 1rem;
+    }
   }
 
   .play-btn {
@@ -168,23 +180,31 @@
     align-items: center;
     justify-content: center;
     line-height: 1;
-  }
 
-  .play-btn:hover {
-    background: var(--black);
-    color: var(--white);
+    &:hover {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    @media (min-width: 640px) {
+      width: 48px;
+      height: 48px;
+      font-size: 1rem;
+    }
   }
 
   .waveform {
     flex: 1;
     min-width: 0;
-  }
 
-  .waveform :global([data-region-content]) {
-    background: var(--white);
-    padding: 0 0.25rem;
-    font-size: 0.625rem;
-    font-weight: 500;
+    :global([data-region-content]) {
+      background: var(--white);
+      padding: 0.125rem 0.375rem;
+      font-size: 0.625rem;
+      font-weight: 600;
+      border-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
   }
 
   .chapters {
@@ -194,6 +214,10 @@
     overflow-x: auto;
     padding-bottom: 0.25rem;
     -webkit-overflow-scrolling: touch;
+
+    @media (min-width: 640px) {
+      margin-top: 0.75rem;
+    }
   }
 
   .chapter {
@@ -206,16 +230,25 @@
     cursor: pointer;
     white-space: nowrap;
     font-size: 0.65rem;
-  }
 
-  .chapter:hover {
-    border-color: var(--black);
-  }
+    &:hover {
+      border-color: var(--black);
+    }
 
-  .chapter.active {
-    background: var(--black);
-    color: var(--white);
-    border-color: var(--black);
+    &.active {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+
+      .chapter-time {
+        color: var(--light-gray);
+      }
+    }
+
+    @media (min-width: 640px) {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+    }
   }
 
   .chapter-time {
@@ -223,40 +256,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .chapter.active .chapter-time {
-    color: var(--light-gray);
-  }
-
   .chapter-title {
     font-weight: 500;
-  }
-
-  @media (min-width: 640px) {
-    .player {
-      padding: 1rem;
-    }
-
-    .player-info {
-      font-size: 0.875rem;
-    }
-
-    .player-controls {
-      gap: 1rem;
-    }
-
-    .play-btn {
-      width: 48px;
-      height: 48px;
-      font-size: 1rem;
-    }
-
-    .chapters {
-      margin-top: 0.75rem;
-    }
-
-    .chapter {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.75rem;
-    }
   }
 </style>
