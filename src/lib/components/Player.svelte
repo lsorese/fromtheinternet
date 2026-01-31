@@ -20,8 +20,19 @@
   }
 
   function seekTo(time: number) {
-    if (audioElement) {
-      audioElement.currentTime = time;
+    if (!audioElement) return;
+
+    const wasPlaying = isPlaying;
+
+    // Pause, seek, then resume if was playing
+    audioElement.pause();
+    audioElement.currentTime = time;
+
+    // Wait for the seek to complete before playing
+    if (wasPlaying) {
+      audioElement.addEventListener('seeked', () => {
+        audioElement.play();
+      }, { once: true });
     }
   }
 
@@ -63,9 +74,8 @@
           barWidth: 2,
           barGap: 1,
           height: 60,
-          media: audioElement, // Use streaming HTML5 audio
+          media: audioElement,
           peaks: peaks ? [peaks] : undefined,
-          duration: peaks ? episode.duration : undefined,
           interact: true
         });
 
