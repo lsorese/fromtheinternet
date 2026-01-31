@@ -130,7 +130,7 @@
         {#if isLoading || isDecoding}
           <div class="loading-overlay">
             <span class="loading-text">
-              {#if isLoading}Loading {loadingProgress}%{:else}Rendering{/if}
+              {#if isLoading}Loading {loadingProgress}%{:else}Please hold, your call is very important to us{/if}
             </span>
           </div>
         {/if}
