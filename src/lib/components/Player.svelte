@@ -70,6 +70,11 @@
           interact: true
         });
 
+        // If we have pre-rendered peaks, waveform renders immediately
+        if (peaks) {
+          isLoading = false;
+        }
+
         regions = wavesurfer.registerPlugin(RegionsPlugin.create());
 
         wavesurfer.on('loading', (percent) => {
