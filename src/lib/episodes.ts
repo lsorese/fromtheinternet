@@ -14,6 +14,7 @@ export interface Episode {
   size: number;
   chapters: Chapter[];
   content: string;
+  peaks?: string; // Path to pre-computed peaks JSON
 }
 
 const episodeFiles = import.meta.glob('/src/content/episodes/*.md', { eager: true }) as Record<
@@ -31,7 +32,8 @@ export function getEpisodes(): Episode[] {
     episodes.push({
       slug,
       ...metadata,
-      content: ''
+      content: '',
+      peaks: `/peaks/${slug}.json`
     });
   }
 
@@ -47,6 +49,7 @@ export function getEpisode(slug: string): Episode | undefined {
   return {
     slug,
     ...module.metadata,
-    content: ''
+    content: '',
+    peaks: `/peaks/${slug}.json`
   };
 }

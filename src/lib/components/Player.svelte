@@ -7,6 +7,7 @@
   let { episode = $bindable<Episode | null>(null), autoplay = $bindable(false) } = $props();
 
   let container: HTMLDivElement = $state(null!);
+  let audioElement: HTMLAudioElement = $state(null!);
   let wavesurfer: WaveSurfer | null = null;
   let regions: RegionsPlugin | null = null;
   let isPlaying = $state(false);
@@ -32,66 +33,89 @@
   });
 
   $effect(() => {
-    if (episode && container && typeof window !== 'undefined') {
+    if (episode && container && audioElement && typeof window !== 'undefined') {
       wavesurfer?.destroy();
 
-      wavesurfer = WaveSurfer.create({
-        container,
-        waveColor: '#888',
-        progressColor: '#000',
-        cursorColor: '#000',
-        barWidth: 2,
-        barGap: 1,
-        height: 60,
-        url: episode.audio,
-        interact: true
-      });
+      // Set the audio source for streaming playback
+      audioElement.src = episode.audio;
 
-      regions = wavesurfer.registerPlugin(RegionsPlugin.create());
+      // Load peaks and create WaveSurfer
+      const initWaveSurfer = async () => {
+        let peaks: number[] | undefined;
 
-      wavesurfer.on('ready', () => {
-        duration = wavesurfer!.getDuration();
+        // Try to load pre-computed peaks
+        if (episode.peaks) {
+          try {
+            const res = await fetch(episode.peaks);
+            if (res.ok) {
+              peaks = await res.json();
+            }
+          } catch {
+            // Fall back to on-demand decoding
+          }
+        }
 
-        if (episode?.chapters) {
-          episode.chapters.forEach((chapter, i) => {
-            const nextChapter = episode!.chapters[i + 1];
-            const end = nextChapter ? nextChapter.start : duration;
+        wavesurfer = WaveSurfer.create({
+          container,
+          waveColor: '#888',
+          progressColor: '#000',
+          cursorColor: '#000',
+          barWidth: 2,
+          barGap: 1,
+          height: 60,
+          media: audioElement, // Use streaming HTML5 audio
+          peaks: peaks ? [peaks] : undefined,
+          duration: peaks ? episode.duration : undefined,
+          interact: true
+        });
 
-            const label = document.createElement('span');
-            label.textContent = chapter.title;
-            label.style.cssText = `
-              background: white;
-              padding: 2px 6px;
-              margin: 4px;
-              font-size: 10px;
-              font-weight: 600;
-              border-radius: 2px;
-              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-              color: black;
-              display: ${window.innerWidth >= 640 ? 'inline-block' : 'none'};
-            `;
+        regions = wavesurfer.registerPlugin(RegionsPlugin.create());
 
-            regions!.addRegion({
-              start: chapter.start,
-              end,
-              content: label,
-              color: 'rgba(0, 0, 0, 0.05)',
-              drag: false,
-              resize: false
+        wavesurfer.on('ready', () => {
+          duration = wavesurfer!.getDuration();
+
+          if (episode?.chapters) {
+            episode.chapters.forEach((chapter, i) => {
+              const nextChapter = episode!.chapters[i + 1];
+              const end = nextChapter ? nextChapter.start : duration;
+
+              const label = document.createElement('span');
+              label.textContent = chapter.title;
+              label.style.cssText = `
+                background: white;
+                padding: 2px 6px;
+                margin: 4px;
+                font-size: 10px;
+                font-weight: 600;
+                border-radius: 2px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+                color: black;
+                display: ${window.innerWidth >= 640 ? 'inline-block' : 'none'};
+              `;
+
+              regions!.addRegion({
+                start: chapter.start,
+                end,
+                content: label,
+                color: 'rgba(0, 0, 0, 0.05)',
+                drag: false,
+                resize: false
+              });
             });
-          });
-        }
+          }
 
-        if (shouldAutoplay) {
-          wavesurfer!.play();
-          shouldAutoplay = false;
-        }
-      });
+          if (shouldAutoplay) {
+            wavesurfer!.play();
+            shouldAutoplay = false;
+          }
+        });
 
-      wavesurfer.on('play', () => isPlaying = true);
-      wavesurfer.on('pause', () => isPlaying = false);
-      wavesurfer.on('timeupdate', (time) => currentTime = time);
+        wavesurfer.on('play', () => isPlaying = true);
+        wavesurfer.on('pause', () => isPlaying = false);
+        wavesurfer.on('timeupdate', (time) => currentTime = time);
+      };
 
+      initWaveSurfer();
     }
   });
 
@@ -99,6 +123,8 @@
     wavesurfer?.destroy();
   });
 </script>
+
+<audio bind:this={audioElement} preload="metadata" hidden></audio>
 
 {#if episode}
   <div class="player">
