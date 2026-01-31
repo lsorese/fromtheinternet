@@ -164,6 +164,10 @@
     font-size: 0.875rem;
     cursor: pointer;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
   }
 
   .play-btn:hover {
@@ -174,6 +178,13 @@
   .waveform {
     flex: 1;
     min-width: 0;
+  }
+
+  .waveform :global([data-region-content]) {
+    background: var(--white);
+    padding: 0 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 500;
   }
 
   .chapters {
