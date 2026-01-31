@@ -7,54 +7,53 @@
   let { episode = $bindable<Episode | null>(null), autoplay = $bindable(false) } = $props();
 
   let container: HTMLDivElement = $state(null!);
-  let audioElement: HTMLAudioElement = $state(null!);
   let wavesurfer: WaveSurfer | null = null;
   let regions: RegionsPlugin | null = null;
   let isPlaying = $state(false);
+  let isBuffering = $state(false);
   let currentTime = $state(0);
   let duration = $state(0);
   let shouldAutoplay = false;
+  let audioLoaded = false;
+  let pendingSeek: number | null = null;
+  let loadAudioFn: (() => void) | null = null;
 
   function togglePlay() {
     wavesurfer?.playPause();
   }
 
   function seekTo(time: number) {
-    if (!audioElement) return;
+    if (!wavesurfer || duration <= 0) return;
 
-    const wasPlaying = isPlaying;
-
-    // Pause, seek, then resume if was playing
-    audioElement.pause();
-    audioElement.currentTime = time;
-
-    // Wait for the seek to complete before playing
-    if (wasPlaying) {
-      audioElement.addEventListener('seeked', () => {
-        audioElement.play();
-      }, { once: true });
+    if (audioLoaded) {
+      // Audio fully loaded, seek directly
+      wavesurfer.seekTo(time / duration);
+    } else {
+      // Audio not loaded yet - store pending seek, show buffering, trigger load
+      pendingSeek = time;
+      isBuffering = true;
+      loadAudioFn?.();
     }
   }
 
   $effect(() => {
     if (autoplay) {
       shouldAutoplay = true;
-      autoplay = false; // Reset the flag
+      autoplay = false;
     }
   });
 
   $effect(() => {
-    if (episode && container && audioElement && typeof window !== 'undefined') {
+    if (episode && container && typeof window !== 'undefined') {
       wavesurfer?.destroy();
+      audioLoaded = false;
+      pendingSeek = null;
+      isBuffering = false;
 
-      // Set the audio source for streaming playback
-      audioElement.src = episode.audio;
-
-      // Load peaks and create WaveSurfer
       const initWaveSurfer = async () => {
         let peaks: number[] | undefined;
 
-        // Try to load pre-computed peaks
+        // Load pre-computed peaks for instant waveform
         if (episode.peaks) {
           try {
             const res = await fetch(episode.peaks);
@@ -66,6 +65,7 @@
           }
         }
 
+        // Create WaveSurfer with peaks for instant waveform display
         wavesurfer = WaveSurfer.create({
           container,
           waveColor: '#888',
@@ -74,55 +74,86 @@
           barWidth: 2,
           barGap: 1,
           height: 60,
-          media: audioElement,
           peaks: peaks ? [peaks] : undefined,
+          duration: episode.duration,
           interact: true
         });
 
         regions = wavesurfer.registerPlugin(RegionsPlugin.create());
 
-        wavesurfer.on('ready', () => {
-          duration = wavesurfer!.getDuration();
+        // Add chapter regions immediately (we have duration from metadata)
+        duration = episode.duration;
+        if (episode.chapters) {
+          episode.chapters.forEach((chapter, i) => {
+            const nextChapter = episode!.chapters[i + 1];
+            const end = nextChapter ? nextChapter.start : duration;
 
-          if (episode?.chapters) {
-            episode.chapters.forEach((chapter, i) => {
-              const nextChapter = episode!.chapters[i + 1];
-              const end = nextChapter ? nextChapter.start : duration;
+            const label = document.createElement('span');
+            label.textContent = chapter.title;
+            label.style.cssText = `
+              background: white;
+              padding: 2px 6px;
+              margin: 4px;
+              font-size: 10px;
+              font-weight: 600;
+              border-radius: 2px;
+              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+              color: black;
+              display: ${window.innerWidth >= 640 ? 'inline-block' : 'none'};
+            `;
 
-              const label = document.createElement('span');
-              label.textContent = chapter.title;
-              label.style.cssText = `
-                background: white;
-                padding: 2px 6px;
-                margin: 4px;
-                font-size: 10px;
-                font-weight: 600;
-                border-radius: 2px;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-                color: black;
-                display: ${window.innerWidth >= 640 ? 'inline-block' : 'none'};
-              `;
-
-              regions!.addRegion({
-                start: chapter.start,
-                end,
-                content: label,
-                color: 'rgba(0, 0, 0, 0.05)',
-                drag: false,
-                resize: false
-              });
+            regions!.addRegion({
+              start: chapter.start,
+              end,
+              content: label,
+              color: 'rgba(0, 0, 0, 0.05)',
+              drag: false,
+              resize: false
             });
-          }
+          });
+        }
 
-          if (shouldAutoplay) {
+        // Load audio when user clicks play or seeks
+        let audioLoadStarted = false;
+        loadAudioFn = () => {
+          if (audioLoadStarted) return;
+          audioLoadStarted = true;
+          isBuffering = true;
+
+          // Fetch the full audio file and load it
+          fetch(episode.audio)
+            .then(res => res.blob())
+            .then(blob => wavesurfer!.loadBlob(blob))
+            .catch(console.error);
+        };
+
+        wavesurfer.on('ready', () => {
+          // This fires after audio is fully decoded
+          audioLoaded = true;
+          isBuffering = false;
+
+          // Handle pending seek
+          if (pendingSeek !== null) {
+            wavesurfer!.seekTo(pendingSeek / duration);
+            wavesurfer!.play();
+            pendingSeek = null;
+          } else if (shouldAutoplay) {
             wavesurfer!.play();
             shouldAutoplay = false;
           }
         });
 
-        wavesurfer.on('play', () => isPlaying = true);
+        wavesurfer.on('play', () => {
+          isPlaying = true;
+          loadAudioFn?.();
+        });
         wavesurfer.on('pause', () => isPlaying = false);
         wavesurfer.on('timeupdate', (time) => currentTime = time);
+
+        // Handle autoplay
+        if (shouldAutoplay) {
+          loadAudioFn();
+        }
       };
 
       initWaveSurfer();
@@ -134,8 +165,6 @@
   });
 </script>
 
-<audio bind:this={audioElement} preload="auto" hidden></audio>
-
 {#if episode}
   <div class="player">
     <div class="player-info">
@@ -144,11 +173,11 @@
     </div>
 
     <div class="player-controls">
-      <button class="play-btn" onclick={togglePlay}>
-        {isPlaying ? '▐▐' : '▶'}
+      <button class="play-btn" onclick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
+        <img src={isPlaying ? '/icons/pause.svg' : '/icons/play.svg'} alt="" width="16" height="16" />
       </button>
 
-      <div class="waveform" bind:this={container}></div>
+      <div class="waveform" class:buffering={isBuffering} bind:this={container}></div>
     </div>
 
     {#if episode.chapters && episode.chapters.length > 0}
@@ -246,6 +275,19 @@
   .waveform {
     flex: 1;
     min-width: 0;
+
+    &.buffering {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 
   .chapters {
