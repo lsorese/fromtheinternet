@@ -6,11 +6,20 @@
  * Usage: node scripts/generate-peaks.js
  *
  * Outputs JSON files to static/peaks/ directory.
+ * Skips gracefully if ffmpeg is not installed (for Vercel deploys).
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'fs';
 import { join, basename } from 'path';
 import { execSync } from 'child_process';
+
+// Check if ffmpeg is available
+try {
+  execSync('which ffmpeg', { stdio: 'ignore' });
+} catch {
+  console.log('ffmpeg not found, skipping peak generation (using committed files)');
+  process.exit(0);
+}
 
 const AUDIO_DIR = 'static/audio';
 const PEAKS_DIR = 'static/peaks';
