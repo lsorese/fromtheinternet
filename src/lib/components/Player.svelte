@@ -10,29 +10,19 @@
   let wavesurfer: WaveSurfer | null = null;
   let regions: RegionsPlugin | null = null;
   let isPlaying = $state(false);
-  let isBuffering = $state(false);
+  let isLoading = $state(false);
+  let loadingProgress = $state(0);
   let currentTime = $state(0);
   let duration = $state(0);
   let shouldAutoplay = false;
-  let audioLoaded = false;
-  let pendingSeek: number | null = null;
-  let loadAudioFn: (() => void) | null = null;
 
   function togglePlay() {
     wavesurfer?.playPause();
   }
 
   function seekTo(time: number) {
-    if (!wavesurfer || duration <= 0) return;
-
-    if (audioLoaded) {
-      // Audio fully loaded, seek directly
+    if (wavesurfer && duration > 0) {
       wavesurfer.seekTo(time / duration);
-    } else {
-      // Audio not loaded yet - store pending seek, show buffering, trigger load
-      pendingSeek = time;
-      isBuffering = true;
-      loadAudioFn?.();
     }
   }
 
@@ -46,44 +36,32 @@
   $effect(() => {
     if (episode && container && typeof window !== 'undefined') {
       wavesurfer?.destroy();
-      audioLoaded = false;
-      pendingSeek = null;
-      isBuffering = false;
+      isLoading = true;
+      loadingProgress = 0;
 
-      const initWaveSurfer = async () => {
-        let peaks: number[] | undefined;
+      wavesurfer = WaveSurfer.create({
+        container,
+        waveColor: '#888',
+        progressColor: '#000',
+        cursorColor: '#000',
+        barWidth: 2,
+        barGap: 1,
+        height: 60,
+        url: episode.audio,
+        interact: true
+      });
 
-        // Load pre-computed peaks for instant waveform
-        if (episode.peaks) {
-          try {
-            const res = await fetch(episode.peaks);
-            if (res.ok) {
-              peaks = await res.json();
-            }
-          } catch {
-            // Fall back to on-demand decoding
-          }
-        }
+      regions = wavesurfer.registerPlugin(RegionsPlugin.create());
 
-        // Create WaveSurfer with peaks for instant waveform display
-        wavesurfer = WaveSurfer.create({
-          container,
-          waveColor: '#888',
-          progressColor: '#000',
-          cursorColor: '#000',
-          barWidth: 2,
-          barGap: 1,
-          height: 60,
-          peaks: peaks ? [peaks] : undefined,
-          duration: episode.duration,
-          interact: true
-        });
+      wavesurfer.on('loading', (percent) => {
+        loadingProgress = percent;
+      });
 
-        regions = wavesurfer.registerPlugin(RegionsPlugin.create());
+      wavesurfer.on('ready', () => {
+        isLoading = false;
+        duration = wavesurfer!.getDuration();
 
-        // Add chapter regions immediately (we have duration from metadata)
-        duration = episode.duration;
-        if (episode.chapters) {
+        if (episode?.chapters) {
           episode.chapters.forEach((chapter, i) => {
             const nextChapter = episode!.chapters[i + 1];
             const end = nextChapter ? nextChapter.start : duration;
@@ -113,50 +91,15 @@
           });
         }
 
-        // Load audio when user clicks play or seeks
-        let audioLoadStarted = false;
-        loadAudioFn = () => {
-          if (audioLoadStarted) return;
-          audioLoadStarted = true;
-          isBuffering = true;
-
-          // Fetch the full audio file and load it
-          fetch(episode.audio)
-            .then(res => res.blob())
-            .then(blob => wavesurfer!.loadBlob(blob))
-            .catch(console.error);
-        };
-
-        wavesurfer.on('ready', () => {
-          // This fires after audio is fully decoded
-          audioLoaded = true;
-          isBuffering = false;
-
-          // Handle pending seek
-          if (pendingSeek !== null) {
-            wavesurfer!.seekTo(pendingSeek / duration);
-            wavesurfer!.play();
-            pendingSeek = null;
-          } else if (shouldAutoplay) {
-            wavesurfer!.play();
-            shouldAutoplay = false;
-          }
-        });
-
-        wavesurfer.on('play', () => {
-          isPlaying = true;
-          loadAudioFn?.();
-        });
-        wavesurfer.on('pause', () => isPlaying = false);
-        wavesurfer.on('timeupdate', (time) => currentTime = time);
-
-        // Handle autoplay
         if (shouldAutoplay) {
-          loadAudioFn();
+          wavesurfer!.play();
+          shouldAutoplay = false;
         }
-      };
+      });
 
-      initWaveSurfer();
+      wavesurfer.on('play', () => isPlaying = true);
+      wavesurfer.on('pause', () => isPlaying = false);
+      wavesurfer.on('timeupdate', (time) => currentTime = time);
     }
   });
 
@@ -177,7 +120,14 @@
         <img src={isPlaying ? '/icons/pause.svg' : '/icons/play.svg'} alt="" width="16" height="16" />
       </button>
 
-      <div class="waveform" class:buffering={isBuffering} bind:this={container}></div>
+      <div class="waveform-container">
+        <div class="waveform" class:loading={isLoading} bind:this={container}></div>
+        {#if isLoading}
+          <div class="loading-overlay">
+            <span class="loading-text">Loading{loadingProgress > 0 ? ` ${loadingProgress}%` : '...'}</span>
+          </div>
+        {/if}
+      </div>
     </div>
 
     {#if episode.chapters && episode.chapters.length > 0}
@@ -272,13 +222,35 @@
     }
   }
 
-  .waveform {
+  .waveform-container {
     flex: 1;
     min-width: 0;
+    position: relative;
+  }
 
-    &.buffering {
+  .waveform {
+    width: 100%;
+
+    &.loading {
       animation: pulse 1.5s ease-in-out infinite;
     }
+  }
+
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .loading-text {
+    background: var(--black);
+    color: var(--white);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
   }
 
   @keyframes pulse {
@@ -286,7 +258,7 @@
       opacity: 1;
     }
     50% {
-      opacity: 0.5;
+      opacity: 0.4;
     }
   }
 
