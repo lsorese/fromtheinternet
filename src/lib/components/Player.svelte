@@ -40,71 +40,95 @@
       isLoading = true;
       loadingProgress = 0;
 
-      wavesurfer = WaveSurfer.create({
-        container,
-        waveColor: '#888',
-        progressColor: '#000',
-        cursorColor: '#000',
-        barWidth: 2,
-        barGap: 1,
-        height: 60,
-        url: episode.audio,
-        interact: true
-      });
+      // Load pre-rendered peaks data
+      const initWavesurfer = async () => {
+        let peaks: number[][] | undefined;
 
-      regions = wavesurfer.registerPlugin(RegionsPlugin.create());
-
-      wavesurfer.on('loading', (percent) => {
-        loadingProgress = percent;
-        if (percent === 100) {
-          isLoading = false;
-          isDecoding = true;
+        if (episode.waveform) {
+          try {
+            const response = await fetch(episode.waveform);
+            if (response.ok) {
+              const data = await response.json();
+              peaks = data.peaks;
+            }
+          } catch {
+            // Fall back to decoding audio if peaks fail to load
+          }
         }
-      });
 
-      wavesurfer.on('ready', () => {
-        isDecoding = false;
-        duration = wavesurfer!.getDuration();
+        wavesurfer = WaveSurfer.create({
+          container,
+          waveColor: '#888',
+          progressColor: '#000',
+          cursorColor: '#000',
+          barWidth: 2,
+          barGap: 1,
+          height: 60,
+          url: episode.audio,
+          peaks,
+          duration: peaks ? episode.duration : undefined,
+          interact: true
+        });
 
-        if (episode?.chapters) {
-          episode.chapters.forEach((chapter, i) => {
-            const nextChapter = episode!.chapters[i + 1];
-            const end = nextChapter ? nextChapter.start : duration;
+        regions = wavesurfer.registerPlugin(RegionsPlugin.create());
 
-            const label = document.createElement('span');
-            label.textContent = chapter.title;
-            label.style.cssText = `
-              background: white;
-              padding: 2px 6px;
-              margin: 4px;
-              font-size: 10px;
-              font-weight: 600;
-              border-radius: 2px;
-              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-              color: black;
-              display: ${window.innerWidth >= 640 ? 'inline-block' : 'none'};
-            `;
+        wavesurfer.on('loading', (percent) => {
+          loadingProgress = percent;
+          if (percent === 100) {
+            isLoading = false;
+            // Only show decoding if we don't have pre-rendered peaks
+            if (!peaks) {
+              isDecoding = true;
+            }
+          }
+        });
 
-            regions!.addRegion({
-              start: chapter.start,
-              end,
-              content: label,
-              color: 'rgba(0, 0, 0, 0.05)',
-              drag: false,
-              resize: false
+        wavesurfer.on('ready', () => {
+          isDecoding = false;
+          duration = wavesurfer!.getDuration();
+
+          if (episode?.chapters) {
+            episode.chapters.forEach((chapter, i) => {
+              const nextChapter = episode!.chapters[i + 1];
+              const end = nextChapter ? nextChapter.start : duration;
+
+              const label = document.createElement('span');
+              label.textContent = chapter.title;
+              label.style.cssText = `
+                background: white;
+                padding: 2px 6px;
+                margin: 4px;
+                font-size: 10px;
+                font-weight: 600;
+                border-radius: 2px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+                color: black;
+                display: ${window.innerWidth >= 640 ? 'inline-block' : 'none'};
+              `;
+
+              regions!.addRegion({
+                start: chapter.start,
+                end,
+                content: label,
+                color: 'rgba(0, 0, 0, 0.05)',
+                drag: false,
+                resize: false
+              });
             });
-          });
-        }
+          }
 
-        if (shouldAutoplay) {
-          wavesurfer!.play();
-          shouldAutoplay = false;
-        }
-      });
+          if (shouldAutoplay) {
+            wavesurfer!.play();
+            shouldAutoplay = false;
+          }
+        });
 
-      wavesurfer.on('play', () => (isPlaying = true));
-      wavesurfer.on('pause', () => (isPlaying = false));
-      wavesurfer.on('timeupdate', (time) => (currentTime = time));
+        wavesurfer.on('play', () => (isPlaying = true));
+        wavesurfer.on('pause', () => (isPlaying = false));
+        wavesurfer.on('timeupdate', (time) => (currentTime = time));
+      };
+
+      initWavesurfer();
     }
   });
 

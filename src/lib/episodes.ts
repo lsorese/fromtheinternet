@@ -14,7 +14,7 @@ export interface Episode {
   size: number;
   chapters: Chapter[];
   content: string;
-  waveform?: string; // Path to pre-rendered waveform image
+  waveform?: string; // Path to pre-rendered waveform peaks JSON
 }
 
 const episodeFiles = import.meta.glob('/src/content/episodes/*.md', { eager: true }) as Record<
@@ -27,7 +27,7 @@ function createEpisode(slug: string, metadata: Omit<Episode, 'slug' | 'content'>
     slug,
     ...metadata,
     content: '',
-    waveform: `/waveforms/${slug}.png`
+    waveform: `/waveforms/${slug}.json`
   };
 }
 
