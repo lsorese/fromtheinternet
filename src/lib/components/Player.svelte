@@ -68,7 +68,7 @@
               border-radius: 2px;
               box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
               color: black;
-              display: inline-block;
+              display: ${window.innerWidth >= 640 ? 'inline-block' : 'none'};
             `;
 
             regions!.addRegion({

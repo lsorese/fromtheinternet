@@ -104,6 +104,12 @@
   .episode-link {
     flex: 1;
     min-width: 0;
+    text-decoration: none;
+    color: inherit;
+
+    &:hover .episode-title {
+      text-decoration: underline;
+    }
   }
 
   .episode-meta {
