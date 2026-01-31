@@ -6,7 +6,7 @@
 
   let { episode = $bindable<Episode | null>(null), autoplay = $bindable(false) } = $props();
 
-  let container: HTMLDivElement;
+  let container: HTMLDivElement = $state(null!);
   let wavesurfer: WaveSurfer | null = null;
   let regions: RegionsPlugin | null = null;
   let isPlaying = $state(false);
@@ -57,10 +57,24 @@
             const nextChapter = episode!.chapters[i + 1];
             const end = nextChapter ? nextChapter.start : duration;
 
+            const label = document.createElement('span');
+            label.textContent = chapter.title;
+            label.style.cssText = `
+              background: white;
+              padding: 2px 6px;
+              margin: 4px;
+              font-size: 10px;
+              font-weight: 600;
+              border-radius: 2px;
+              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+              color: black;
+              display: inline-block;
+            `;
+
             regions!.addRegion({
               start: chapter.start,
               end,
-              content: chapter.title,
+              content: label,
               color: 'rgba(0, 0, 0, 0.05)',
               drag: false,
               resize: false
@@ -196,15 +210,6 @@
   .waveform {
     flex: 1;
     min-width: 0;
-
-    :global([data-region-content]) {
-      background: var(--white);
-      padding: 0.125rem 0.375rem;
-      font-size: 0.625rem;
-      font-weight: 600;
-      border-radius: 2px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-    }
   }
 
   .chapters {
