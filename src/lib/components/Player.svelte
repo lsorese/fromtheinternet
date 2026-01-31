@@ -20,8 +20,8 @@
   }
 
   function seekTo(time: number) {
-    if (wavesurfer && duration > 0) {
-      wavesurfer.seekTo(time / duration);
+    if (wavesurfer) {
+      wavesurfer.setTime(time);
     }
   }
 
@@ -124,7 +124,7 @@
   });
 </script>
 
-<audio bind:this={audioElement} preload="metadata" hidden></audio>
+<audio bind:this={audioElement} preload="auto" hidden></audio>
 
 {#if episode}
   <div class="player">
