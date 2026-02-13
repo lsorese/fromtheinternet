@@ -172,11 +172,17 @@
     {#if episode.chapters && episode.chapters.length > 0}
       <div class="flex gap-2 mt-2 sm:mt-3 overflow-x-auto pb-1 -webkit-overflow-scrolling-touch">
         {#each episode.chapters as chapter}
+          {@const isActive = currentTime >= chapter.start}
           <button
-            class="flex flex-col items-start px-2.5 py-1.5 sm:px-3 sm:py-2 border border-light-gray bg-white cursor-pointer whitespace-nowrap text-[0.65rem] sm:text-xs hover:border-black {currentTime >= chapter.start ? 'bg-black text-white !border-black' : ''}"
+            class="flex flex-col items-start px-2.5 py-1.5 sm:px-3 sm:py-2 border cursor-pointer whitespace-nowrap text-[0.65rem] sm:text-xs hover:border-black"
+            class:bg-black={isActive}
+            class:text-white={isActive}
+            class:border-black={isActive}
+            class:bg-white={!isActive}
+            class:border-light-gray={!isActive}
             onclick={() => seekTo(chapter.start)}
           >
-            <span class="tabular-nums {currentTime >= chapter.start ? 'text-light-gray' : 'text-gray'}">{formatTime(chapter.start)}</span>
+            <span class="tabular-nums" class:text-light-gray={isActive} class:text-gray={!isActive}>{formatTime(chapter.start)}</span>
             <span class="font-medium">{chapter.title}</span>
           </button>
         {/each}
