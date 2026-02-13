@@ -143,22 +143,25 @@
 </script>
 
 {#if episode}
-  <div class="player">
-    <div class="player-info">
-      <span class="player-title">{episode.title}</span>
-      <span class="player-time">{formatTime(currentTime)} / {formatTime(duration)}</span>
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black p-3 sm:p-4">
+    <div class="flex justify-between mb-2 text-xs sm:text-sm">
+      <span class="font-semibold overflow-hidden text-ellipsis whitespace-nowrap mr-2">{episode.title}</span>
+      <span class="tabular-nums text-gray shrink-0">{formatTime(currentTime)} / {formatTime(duration)}</span>
     </div>
 
-    <div class="player-controls">
-      <button class="play-btn" onclick={togglePlay}>
+    <div class="flex gap-3 sm:gap-4 items-center">
+      <button
+        class="w-10 h-10 sm:w-12 sm:h-12 border-2 border-black bg-white text-sm sm:text-base cursor-pointer shrink-0 flex items-center justify-center leading-none hover:bg-black hover:text-white"
+        onclick={togglePlay}
+      >
         {isPlaying ? '▐▐' : '▶'}
       </button>
 
-      <div class="waveform-container">
-        <div class="waveform" class:loading={isLoading} bind:this={container}></div>
+      <div class="flex-1 min-w-0 relative">
+        <div class="w-full" class:loading-pulse={isLoading} bind:this={container}></div>
         {#if isLoading || isDecoding}
-          <div class="loading-overlay">
-            <span class="loading-text">
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span class="bg-black text-white px-2 py-1 text-[0.7rem] font-semibold">
               {#if isLoading}Loading {loadingProgress}%{:else}Please hold, your call is very important to us{/if}
             </span>
           </div>
@@ -167,188 +170,17 @@
     </div>
 
     {#if episode.chapters && episode.chapters.length > 0}
-      <div class="chapters">
+      <div class="flex gap-2 mt-2 sm:mt-3 overflow-x-auto pb-1 -webkit-overflow-scrolling-touch">
         {#each episode.chapters as chapter}
           <button
-            class="chapter"
-            class:active={currentTime >= chapter.start}
+            class="flex flex-col items-start px-2.5 py-1.5 sm:px-3 sm:py-2 border border-light-gray bg-white cursor-pointer whitespace-nowrap text-[0.65rem] sm:text-xs hover:border-black {currentTime >= chapter.start ? 'bg-black text-white !border-black' : ''}"
             onclick={() => seekTo(chapter.start)}
           >
-            <span class="chapter-time">{formatTime(chapter.start)}</span>
-            <span class="chapter-title">{chapter.title}</span>
+            <span class="tabular-nums {currentTime >= chapter.start ? 'text-light-gray' : 'text-gray'}">{formatTime(chapter.start)}</span>
+            <span class="font-medium">{chapter.title}</span>
           </button>
         {/each}
       </div>
     {/if}
   </div>
 {/if}
-
-<style lang="scss">
-  .player {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--white);
-    border-top: 2px solid var(--black);
-    padding: 0.75rem;
-
-    @media (min-width: 640px) {
-      padding: 1rem;
-    }
-  }
-
-  .player-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    font-size: 0.75rem;
-
-    @media (min-width: 640px) {
-      font-size: 0.875rem;
-    }
-  }
-
-  .player-title {
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-right: 0.5rem;
-  }
-
-  .player-time {
-    font-variant-numeric: tabular-nums;
-    color: var(--gray);
-    flex-shrink: 0;
-  }
-
-  .player-controls {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-
-    @media (min-width: 640px) {
-      gap: 1rem;
-    }
-  }
-
-  .play-btn {
-    width: 40px;
-    height: 40px;
-    border: 2px solid var(--black);
-    background: var(--white);
-    font-size: 0.875rem;
-    cursor: pointer;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-
-    &:hover {
-      background: var(--black);
-      color: var(--white);
-    }
-
-    @media (min-width: 640px) {
-      width: 48px;
-      height: 48px;
-      font-size: 1rem;
-    }
-  }
-
-  .waveform-container {
-    flex: 1;
-    min-width: 0;
-    position: relative;
-  }
-
-  .waveform {
-    width: 100%;
-
-    &.loading {
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-  }
-
-  .loading-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-  }
-
-  .loading-text {
-    background: var(--black);
-    color: var(--white);
-    padding: 0.25rem 0.5rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.4;
-    }
-  }
-
-  .chapters {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
-    -webkit-overflow-scrolling: touch;
-
-    @media (min-width: 640px) {
-      margin-top: 0.75rem;
-    }
-  }
-
-  .chapter {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--light-gray);
-    background: var(--white);
-    cursor: pointer;
-    white-space: nowrap;
-    font-size: 0.65rem;
-
-    &:hover {
-      border-color: var(--black);
-    }
-
-    &.active {
-      background: var(--black);
-      color: var(--white);
-      border-color: var(--black);
-
-      .chapter-time {
-        color: var(--light-gray);
-      }
-    }
-
-    @media (min-width: 640px) {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.75rem;
-    }
-  }
-
-  .chapter-time {
-    color: var(--gray);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .chapter-title {
-    font-weight: 500;
-  }
-</style>

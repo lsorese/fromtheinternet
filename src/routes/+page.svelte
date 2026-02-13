@@ -12,161 +12,42 @@
   <meta name="description" content="A monthly radio show podcast featuring curated tracks and sonic adventures." />
 </svelte:head>
 
-<section class="hero">
-  <h1>FROM THE INTERNET</h1>
-  <p>A monthly radio show. Music, noise, and everything in between.</p>
+<section class="text-center py-8 border-b-2 border-black mb-4">
+  <h1 class="text-2xl sm:text-3xl font-bold tracking-widest mb-2">FROM THE INTERNET</h1>
+  <p class="text-gray text-sm">A monthly radio show. Music, noise, and everything in between.</p>
 </section>
 
-<section class="episodes">
-  <h2>Episodes</h2>
+<section>
+  <h2 class="text-xs uppercase tracking-widest mb-4 text-gray">Episodes</h2>
 
-  <ul class="episode-list">
+  <ul class="list-none flex flex-col gap-px bg-black -mx-4">
     {#each data.episodes as episode}
-      <li class="episode-item">
-        <a href="/episodes/{episode.slug}" class="episode-link">
-          <div class="episode-meta">
-            <span class="episode-date">{formatDate(episode.date)}</span>
-            <span class="episode-duration">{formatDuration(episode.duration)}</span>
+      <li class="bg-white p-4 flex justify-between items-start gap-3">
+        <a href="/episodes/{episode.slug}" class="flex-1 min-w-0 no-underline text-inherit group">
+          <div class="flex gap-3 text-[0.7rem] text-gray mb-1 tabular-nums">
+            <span>{formatDate(episode.date)}</span>
+            <span>{formatDuration(episode.duration)}</span>
           </div>
-          <h3 class="episode-title">{episode.title}</h3>
-          <p class="episode-desc">{episode.description}</p>
+          <h3 class="text-base font-semibold mb-1 group-hover:underline">{episode.title}</h3>
+          <p class="text-[0.8rem] text-gray">{episode.description}</p>
           {#if episode.chapters && episode.chapters.length > 0}
-            <ul class="episode-tracks">
+            <ul class="list-none flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[0.7rem]">
               {#each episode.chapters as chapter}
-                <li>
-                  <span class="track-time">{formatTime(chapter.start)}</span>
-                  <span class="track-name">{chapter.title}</span>
+                <li class="flex gap-1.5">
+                  <span class="text-gray tabular-nums">{formatTime(chapter.start)}</span>
+                  <span class="text-gray">{chapter.title}</span>
                 </li>
               {/each}
             </ul>
           {/if}
         </a>
-        <button class="play-btn" onclick={() => playEpisode(episode)}>
+        <button
+          class="px-3 py-1.5 border-2 border-black bg-white text-[0.7rem] font-semibold cursor-pointer whitespace-nowrap hover:bg-black hover:text-white"
+          onclick={() => playEpisode(episode)}
+        >
           ▶ Play
         </button>
       </li>
     {/each}
   </ul>
 </section>
-
-<style lang="scss">
-  .hero {
-    text-align: center;
-    padding: 2rem 0;
-    border-bottom: 2px solid var(--black);
-    margin-bottom: 1rem;
-
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.5rem;
-
-      @media (min-width: 640px) {
-        font-size: 2rem;
-      }
-    }
-
-    p {
-      color: var(--gray);
-      font-size: 0.875rem;
-    }
-  }
-
-  .episodes {
-    h2 {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 1rem;
-      color: var(--gray);
-    }
-  }
-
-  .episode-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    background: var(--black);
-    margin: 0 -1rem;
-  }
-
-  .episode-item {
-    background: var(--white);
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .episode-link {
-    flex: 1;
-    min-width: 0;
-    text-decoration: none;
-    color: inherit;
-
-    &:hover .episode-title {
-      text-decoration: underline;
-    }
-  }
-
-  .episode-meta {
-    display: flex;
-    gap: 0.75rem;
-    font-size: 0.7rem;
-    color: var(--gray);
-    margin-bottom: 0.25rem;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .episode-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-
-  .episode-desc {
-    font-size: 0.8rem;
-    color: var(--gray);
-  }
-
-  .episode-tracks {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0.75rem;
-    margin-top: 0.5rem;
-    font-size: 0.7rem;
-
-    li {
-      display: flex;
-      gap: 0.35rem;
-    }
-
-    .track-time,
-    .track-name {
-      color: var(--gray);
-    }
-
-    .track-time {
-      font-variant-numeric: tabular-nums;
-    }
-  }
-
-  .play-btn {
-    padding: 0.4rem 0.75rem;
-    border: 2px solid var(--black);
-    background: var(--white);
-    font-size: 0.7rem;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-
-    &:hover {
-      background: var(--black);
-      color: var(--white);
-    }
-  }
-</style>

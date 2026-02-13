@@ -12,34 +12,37 @@
   <meta name="description" content={data.episode.description} />
 </svelte:head>
 
-<article class="episode">
-  <header class="episode-header">
-    <div class="episode-meta">
+<article class="max-w-[600px]">
+  <header class="pb-8 border-b-2 border-black mb-8">
+    <div class="flex gap-4 text-sm text-gray mb-4">
       <span>{formatDate(data.episode.date, 'long')}</span>
       <span>{formatDuration(data.episode.duration)}</span>
     </div>
-    <h1>{data.episode.title}</h1>
-    <p class="description">{data.episode.description}</p>
+    <h1 class="text-3xl font-bold mb-2">{data.episode.title}</h1>
+    <p class="text-gray mb-6">{data.episode.description}</p>
 
-    <button class="play-btn" onclick={() => playEpisode(data.episode)}>
+    <button
+      class="px-6 py-3 border-2 border-black bg-black text-white text-sm font-semibold cursor-pointer hover:bg-white hover:text-black"
+      onclick={() => playEpisode(data.episode)}
+    >
       ▶ Play Episode
     </button>
   </header>
 
   {#if data.episode.chapters && data.episode.chapters.length > 0}
-    <section class="tracklist">
-      <h2>Tracklist</h2>
-      <ol class="tracks">
+    <section class="mb-8">
+      <h2 class="text-xs uppercase tracking-widest text-gray mb-4">Tracklist</h2>
+      <ol class="list-none border border-black">
         {#each data.episode.chapters as chapter, i}
-          <li class="track">
-            <span class="track-number">{String(i + 1).padStart(2, '0')}</span>
-            <div class="track-info">
-              <span class="track-title">{chapter.title}</span>
+          <li class="flex items-baseline gap-4 px-4 py-3 border-b border-light-gray last:border-b-0">
+            <span class="text-[0.7rem] text-gray tabular-nums shrink-0">{String(i + 1).padStart(2, '0')}</span>
+            <div class="flex-1 min-w-0 flex flex-col gap-0.5">
+              <span class="font-semibold text-[0.9rem]">{chapter.title}</span>
               {#if chapter.desc}
-                <span class="track-desc">{chapter.desc}</span>
+                <span class="text-[0.8rem] text-gray">{chapter.desc}</span>
               {/if}
             </div>
-            <span class="track-time">{formatTime(chapter.start)}</span>
+            <span class="text-xs text-gray tabular-nums shrink-0">{formatTime(chapter.start)}</span>
           </li>
         {/each}
       </ol>
@@ -47,164 +50,41 @@
   {/if}
 
   {#if data.Content}
-    <div class="content">
+    <div class="prose">
       <data.Content />
     </div>
   {/if}
 
-  <footer class="episode-footer">
-    <a href="/">← All Episodes</a>
+  <footer class="mt-12 pt-8 border-t border-light-gray">
+    <a href="/" class="text-sm text-gray">← All Episodes</a>
   </footer>
 </article>
 
-<style lang="scss">
-  .episode {
-    max-width: 600px;
+<style>
+  @reference "tailwindcss";
+
+  .prose :global(h2) {
+    @apply text-xl font-semibold mt-8 mb-4;
   }
 
-  .episode-header {
-    padding-bottom: 2rem;
-    border-bottom: 2px solid var(--black);
-    margin-bottom: 2rem;
+  .prose :global(h3) {
+    @apply text-base font-semibold mt-6 mb-3;
   }
 
-  .episode-meta {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.875rem;
-    color: var(--gray);
-    margin-bottom: 1rem;
+  .prose :global(p) {
+    @apply mb-4;
   }
 
-  h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+  .prose :global(ol),
+  .prose :global(ul) {
+    @apply mb-4 pl-6;
   }
 
-  .description {
-    color: var(--gray);
-    margin-bottom: 1.5rem;
+  .prose :global(li) {
+    @apply mb-2;
   }
 
-  .play-btn {
-    padding: 0.75rem 1.5rem;
-    border: 2px solid var(--black);
-    background: var(--black);
-    color: var(--white);
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-
-    &:hover {
-      background: var(--white);
-      color: var(--black);
-    }
-  }
-
-  .content {
-    line-height: 1.7;
-
-    :global(h2) {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 2rem 0 1rem;
-    }
-
-    :global(h3) {
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 1.5rem 0 0.75rem;
-    }
-
-    :global(p) {
-      margin-bottom: 1rem;
-    }
-
-    :global(ol),
-    :global(ul) {
-      margin-bottom: 1rem;
-      padding-left: 1.5rem;
-    }
-
-    :global(li) {
-      margin-bottom: 0.5rem;
-    }
-
-    :global(a) {
-      text-decoration: underline;
-    }
-  }
-
-  .tracklist {
-    margin-bottom: 2rem;
-
-    h2 {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--gray);
-      margin-bottom: 1rem;
-    }
-  }
-
-  .tracks {
-    list-style: none;
-    border: 1px solid var(--black);
-  }
-
-  .track {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--light-gray);
-
-    &:last-child {
-      border-bottom: none;
-    }
-  }
-
-  .track-number {
-    font-size: 0.7rem;
-    color: var(--gray);
-    font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
-  }
-
-  .track-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-  }
-
-  .track-title {
-    font-weight: 600;
-    font-size: 0.9rem;
-  }
-
-  .track-desc {
-    font-size: 0.8rem;
-    color: var(--gray);
-  }
-
-  .track-time {
-    font-size: 0.75rem;
-    color: var(--gray);
-    font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
-  }
-
-  .episode-footer {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--light-gray);
-
-    a {
-      font-size: 0.875rem;
-      color: var(--gray);
-    }
+  .prose :global(a) {
+    @apply underline;
   }
 </style>

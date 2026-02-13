@@ -3,53 +3,30 @@
   <meta name="description" content="About From The Internet, a monthly radio show." />
 </svelte:head>
 
-<article class="about">
-  <h1>About</h1>
+<article class="max-w-[600px]">
+  <h1 class="text-3xl font-bold mb-6">About</h1>
 
-  <p>
+  <p class="mb-4 leading-relaxed">
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
   </p>
 
-  <p>
+  <p class="mb-4 leading-relaxed">
     Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
   </p>
 
-  <h2>The Show</h2>
+  <h2 class="text-xl font-semibold mt-8 mb-4">The Show</h2>
 
-  <p>
+  <p class="mb-4 leading-relaxed">
     Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
   </p>
 
-  <p>
+  <p class="mb-4 leading-relaxed">
     Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
   </p>
 
-  <h2>Contact</h2>
+  <h2 class="text-xl font-semibold mt-8 mb-4">Contact</h2>
 
-  <p>
+  <p class="mb-4 leading-relaxed">
     At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.
   </p>
 </article>
-
-<style lang="scss">
-  .about {
-    max-width: 600px;
-  }
-
-  h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-  }
-
-  h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 2rem 0 1rem;
-  }
-
-  p {
-    margin-bottom: 1rem;
-    line-height: 1.7;
-  }
-</style>
